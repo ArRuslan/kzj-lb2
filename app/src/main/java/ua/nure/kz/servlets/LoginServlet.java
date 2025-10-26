@@ -19,19 +19,10 @@ public class LoginServlet extends HttpServlet {
     private static final Log log = LogFactory.getLog(LoginServlet.class);
 
     public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
-        Long userIdFromSess = (Long)req.getSession().getAttribute("userId");
-        if(userIdFromSess != null) {
-            User user = null;
-            try {
-                user = DatabaseManager.getInstance().getUser(userIdFromSess);
-            } catch (SQLException exc) {
-                log.error("Failed get user!", exc);
-            }
-
-            if(user != null) {
-                resp.sendRedirect("users");
-                return;
-            }
+        User user = Util.getUserFromSession(req);
+        if (user != null) {
+            resp.sendRedirect("users");
+            return;
         }
 
         req.getRequestDispatcher("login.jsp").forward(req, resp);
@@ -59,7 +50,7 @@ public class LoginServlet extends HttpServlet {
             return;
         }
 
-        req.getSession().setAttribute("userId", user.getId());
+        req.getSession().setAttribute("user", user);
         resp.sendRedirect("users");
     }
 }
