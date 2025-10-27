@@ -1,4 +1,4 @@
-package ua.nure.kz.servlets;
+package ua.nure.kz.servlets.users;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -9,14 +9,15 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import ua.nure.kz.DatabaseManager;
 import ua.nure.kz.entities.User;
+import ua.nure.kz.servlets.Util;
 
 import java.io.IOException;
 import java.sql.SQLException;
 
 
-@WebServlet("/users/edit/*")
-public class EditUserServlet extends HttpServlet {
-    private static final Log log = LogFactory.getLog(EditUserServlet.class);
+@WebServlet("/users/delete/*")
+public class DeleteUserServlet extends HttpServlet {
+    private static final Log log = LogFactory.getLog(DeleteUserServlet.class);
 
     public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
         User currentUser = Util.getUserFromSession(req);
@@ -36,7 +37,7 @@ public class EditUserServlet extends HttpServlet {
         }
 
         req.setAttribute("user", user);
-        req.getRequestDispatcher("/users/edit.jsp").forward(req, resp);
+        req.getRequestDispatcher("/users/delete.jsp").forward(req, resp);
     }
 
     public void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
@@ -50,40 +51,18 @@ public class EditUserServlet extends HttpServlet {
             return;
         }
 
-        String login = req.getParameter("login");
-        String password = req.getParameter("password");
-        String fullName = req.getParameter("fullName");
-        String role = req.getParameter("role");
-
-        try {
-            User.Role.valueOf(role);
-        } catch (IllegalArgumentException e) {
-            role = null;
-        }
-
-        if(login == null || password == null || fullName == null || role == null) {
-            req.setAttribute("error", "Invalid user data");
-            req.getRequestDispatcher("/users//edit.jsp").forward(req, resp);
-            return;
-        }
-
         User user = Util.getUserFromPath(req);
         if(user == null) {
             resp.sendRedirect(req.getContextPath() + "/users");
             return;
         }
 
-        user.setLogin(login);
-        user.setPassword(password);
-        user.setFullName(fullName);
-        user.setRole(User.Role.valueOf(role));
-
         try {
-            DatabaseManager.getInstance().updateUser(user);
+            DatabaseManager.getInstance().deleteUser(user);
         } catch (SQLException exc) {
-            log.error("Failed to edit user!", exc);
-            req.setAttribute("error", "Failed to edit user");
-            req.getRequestDispatcher("/users/edit.jsp").forward(req, resp);
+            log.error("Failed to delete user!", exc);
+            req.setAttribute("error", "Failed to delete edit user");
+            req.getRequestDispatcher("/users/delete.jsp").forward(req, resp);
             return;
         }
 

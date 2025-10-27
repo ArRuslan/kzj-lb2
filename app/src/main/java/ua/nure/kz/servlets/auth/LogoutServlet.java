@@ -1,4 +1,4 @@
-package ua.nure.kz.servlets;
+package ua.nure.kz.servlets.auth;
 
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;

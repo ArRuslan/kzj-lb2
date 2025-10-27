@@ -1,4 +1,4 @@
-package ua.nure.kz.servlets;
+package ua.nure.kz.servlets.users;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -10,6 +10,7 @@ import org.apache.commons.logging.LogFactory;
 import ua.nure.kz.DatabaseManager;
 import ua.nure.kz.entities.Group;
 import ua.nure.kz.entities.User;
+import ua.nure.kz.servlets.Util;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -36,7 +37,7 @@ public class UsersServlet extends HttpServlet {
         } catch (SQLException exc) {
             log.error("Failed get users!", exc);
             req.setAttribute("error", "Failed to fetch users from database");
-            req.getRequestDispatcher("/users/list/users/list.jsp").forward(req, resp);
+            req.getRequestDispatcher("/users/list.jsp").forward(req, resp);
             return;
         }
 

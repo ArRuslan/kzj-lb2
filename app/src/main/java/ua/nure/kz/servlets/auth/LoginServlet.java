@@ -1,4 +1,4 @@
-package ua.nure.kz.servlets;
+package ua.nure.kz.servlets.auth;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -9,6 +9,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import ua.nure.kz.DatabaseManager;
 import ua.nure.kz.entities.User;
+import ua.nure.kz.servlets.Util;
 
 import java.io.IOException;
 import java.sql.SQLException;
