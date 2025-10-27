@@ -42,4 +42,42 @@ public class UsersServlet extends HttpServlet {
 
         req.getRequestDispatcher("users.jsp").forward(req, resp);
     }
+
+    public void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
+        User user = Util.getUserFromSession(req);
+        if (user == null) {
+            resp.sendRedirect("login");
+            return;
+        }
+
+        String login = req.getParameter("login");
+        String password = req.getParameter("password");
+        String fullName = req.getParameter("fullName");
+        String role = req.getParameter("role");
+
+        try {
+            User.Role.valueOf(role);
+        } catch (IllegalArgumentException e) {
+            role = null;
+        }
+
+        if(login == null || password == null || fullName == null || role == null) {
+            req.setAttribute("error", "Invalid user data");
+            req.getRequestDispatcher("users.jsp").forward(req, resp);
+            return;
+        }
+
+        User newUser = new User(login, password, fullName, User.Role.valueOf(role));
+
+        try {
+            DatabaseManager.getInstance().createUser(newUser);
+        } catch (SQLException exc) {
+            log.error("Failed create user!", exc);
+            req.setAttribute("error", "Failed to create user");
+            req.getRequestDispatcher("users.jsp").forward(req, resp);
+            return;
+        }
+
+        resp.sendRedirect("users");
+    }
 }

@@ -15,7 +15,7 @@ You are logged in as user [${sessionScope.user.getRole().toString()}] <b>${sessi
 
 <c:if test="${sessionScope.user.getRole() == Role.ADMIN}">
     <h3>Add user</h3>
-    <form method="POST" action="login" class="d-flex col gap-2">
+    <form method="POST" action="users" class="d-flex col gap-2">
         <input name="login" placeholder="Login" />
         <input name="password" placeholder="Password" type="password" />
         <input name="fullName" placeholder="Full Name" />
@@ -32,6 +32,7 @@ You are logged in as user [${sessionScope.user.getRole().toString()}] <b>${sessi
         <th scope="col">Login</th>
         <th scope="col">Full Name</th>
         <th scope="col">Groups</th>
+        <th scope="col">Actions</th>
     </tr>
     </thead>
 
@@ -48,6 +49,10 @@ You are logged in as user [${sessionScope.user.getRole().toString()}] <b>${sessi
                 ,
             </c:if>
         </c:forEach>
+            </td>
+            <td>
+                <a href="#">Edit</a>
+                <a href="#">Delete</a>
             </td>
         </tr>
     </c:forEach>
