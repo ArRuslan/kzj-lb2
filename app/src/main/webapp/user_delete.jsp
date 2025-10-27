@@ -10,15 +10,13 @@
 <body>
 You are logged in as user [${sessionScope.user.getRole().toString()}] <b>${sessionScope.user.getFullName()}</b> <a href="${pageContext.request.contextPath}/logout">Logout</a>
 
-<h2>User ${user.getLogin()}</h2>
+<h2>Are you sure you want to delete user ${user.getLogin()}?</h2>
 
-<form method="POST" action="${pageContext.request.contextPath}/users/edit/${user.getId()}" class="d-flex col gap-2">
-    <input name="login" placeholder="Login" value="${user.getLogin()}"/>
-    <input name="password" placeholder="Password" type="password" value="${user.getPassword()}"/>
-    <input name="fullName" placeholder="Full Name" value="${user.getFullName()}"/>
-    <input name="role" placeholder="Role" value="${user.getRole()}"/>
-
-    <button type="submit" class="btn btn-primary">Edit</button>
+<form action="" method="POST">
+    <div class="btn-group d-flex" role="group">
+        <a role="button" href="${pageContext.request.contextPath}/users" class="btn btn-danger w-100">Cancel</a>
+        <button type="submit" class="btn btn-warning w-100">Delete</button>
+    </div>
 </form>
 
 </body>

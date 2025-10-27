@@ -27,4 +27,28 @@ public class Util {
 
         return null;
     }
+
+    public static User getUserFromPath(HttpServletRequest req) {
+        String[] pathParts = req.getPathInfo().split("/");
+        if(pathParts.length == 0) {
+            return null;
+        }
+
+        String userIdFromPath = pathParts[1];
+        long userId;
+
+        try {
+            userId = Long.parseLong(userIdFromPath);
+        } catch (NumberFormatException e) {
+            log.warn("Failed parse user id!", e);
+            return null;
+        }
+
+        try {
+            return DatabaseManager.getInstance().getUser(userId);
+        } catch (SQLException exc) {
+            log.error("Failed get user!", exc);
+            return null;
+        }
+    }
 }
