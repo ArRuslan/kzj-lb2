@@ -29,11 +29,18 @@ public class UsersServlet extends HttpServlet {
             return;
         }
 
+        Group byGroup = Util.getGroupFromParam(req, "groupId");
+
+        List<User> users;
+        Map<Long, List<Group>> userGroups;
+
         try {
-            List<User> users = DatabaseManager.getInstance().getUsers(1, 5);
-            Map<Long, List<Group>> userGroups = DatabaseManager.getInstance().getUserGroups(users.stream().map(User::getId).toList());
-            req.setAttribute("users", users);
-            req.setAttribute("userGroups", userGroups);
+            if(byGroup == null) {
+                users = DatabaseManager.getInstance().getUsers(1, 5);
+            } else {
+                users = DatabaseManager.getInstance().getUsers(byGroup, 1, 5);
+            }
+            userGroups = DatabaseManager.getInstance().getUserGroups(users.stream().map(User::getId).toList());
         } catch (SQLException exc) {
             log.error("Failed get users!", exc);
             req.setAttribute("error", "Failed to fetch users from database");
@@ -41,6 +48,8 @@ public class UsersServlet extends HttpServlet {
             return;
         }
 
+        req.setAttribute("users", users);
+        req.setAttribute("userGroups", userGroups);
         req.getRequestDispatcher("/users/list.jsp").forward(req, resp);
     }
 

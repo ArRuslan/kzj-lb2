@@ -64,6 +64,24 @@ public class DatabaseManager {
         return users;
     }
 
+    public List<User> getUsers(Group group, int page, int pageSize) throws SQLException {
+        List<User> users = new ArrayList<>();
+
+        try (Connection conn = getConnection()) {
+            PreparedStatement stmt = conn.prepareStatement(Queries.GET_USERS_BY_GROUP_PAGINATED);
+            stmt.setLong(1, group.getId());
+            stmt.setInt(2, pageSize);
+            stmt.setInt(3, (page - 1) * pageSize);
+
+            ResultSet result = stmt.executeQuery();
+            while (result.next()) {
+                users.add(User.fromResultSet(result));
+            }
+        }
+
+        return users;
+    }
+
     public long getUsersCount() throws SQLException {
         try (Connection conn = getConnection()) {
             Statement stmt = conn.createStatement();
@@ -278,5 +296,6 @@ public class DatabaseManager {
         private static final String DELETE_GROUP = "DELETE FROM `groups` WHERE `id`=?;";
 
         private static final String GET_GROUPS_BY_USERS = "SELECT g.id AS `group_id`, g.name AS `group_name`, ug.user_id AS `user_id` FROM `groups` g INNER JOIN `user_groups` JOIN `user_groups` ug on g.id = ug.group_id WHERE FIND_IN_SET(ug.user_id, ?);";
+        private static final String GET_USERS_BY_GROUP_PAGINATED = "SELECT u.id AS `id`, u.login AS `login`, u.password AS `password`, u.fullName AS `fullName`, u.role AS `role` FROM `users` u INNER JOIN `user_groups` ug ON u.id = ug.user_id WHERE ug.group_id = ? LIMIT ? OFFSET ?;";
     }
 }

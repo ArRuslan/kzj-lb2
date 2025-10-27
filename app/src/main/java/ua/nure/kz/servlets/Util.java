@@ -92,4 +92,27 @@ public class Util {
 
         return false;
     }
+
+    public static Group getGroupFromParam(HttpServletRequest req, String paramName) {
+        String groupIdFromParam = req.getParameter(paramName);
+        if(groupIdFromParam == null || groupIdFromParam.isEmpty()) {
+            return null;
+        }
+
+        long groupId;
+
+        try {
+            groupId = Long.parseLong(groupIdFromParam);
+        } catch (NumberFormatException e) {
+            log.warn("Failed parse group id!", e);
+            return null;
+        }
+
+        try {
+            return DatabaseManager.getInstance().getGroup(groupId);
+        } catch (SQLException exc) {
+            log.error("Failed get group!", exc);
+            return null;
+        }
+    }
 }

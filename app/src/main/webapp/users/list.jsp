@@ -42,7 +42,7 @@
                     <td>${user.getFullName()}</td>
                     <td>
                         <c:forEach items="${userGroups.get(user)}" var="group" varStatus="status">
-                            <a href="${pageContext.request.contextPath}/groups/${group.getId()}">${group.getName()}</a>
+                            <a href="${pageContext.request.contextPath}/users?groupId=${group.getId()}">${group.getName()}</a>
                             <c:if test="${!status.last}">
                                 ,
                             </c:if>
