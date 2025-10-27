@@ -21,7 +21,7 @@ public class LoginServlet extends HttpServlet {
     public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
         User user = Util.getUserFromSession(req);
         if (user != null) {
-            resp.sendRedirect("users");
+            resp.sendRedirect(req.getContextPath() + "/users");
             return;
         }
 
@@ -51,6 +51,6 @@ public class LoginServlet extends HttpServlet {
         }
 
         req.getSession().setAttribute("user", user);
-        resp.sendRedirect("users");
+        resp.sendRedirect(req.getContextPath() + "/users");
     }
 }

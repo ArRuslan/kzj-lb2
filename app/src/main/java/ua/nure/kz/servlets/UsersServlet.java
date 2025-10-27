@@ -24,7 +24,7 @@ public class UsersServlet extends HttpServlet {
     public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
         User user = Util.getUserFromSession(req);
         if (user == null) {
-            resp.sendRedirect("login");
+            resp.sendRedirect(req.getContextPath() + "/login");
             return;
         }
 
@@ -46,7 +46,7 @@ public class UsersServlet extends HttpServlet {
     public void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
         User user = Util.getUserFromSession(req);
         if (user == null) {
-            resp.sendRedirect("login");
+            resp.sendRedirect(req.getContextPath() + "/login");
             return;
         }
 
@@ -78,6 +78,6 @@ public class UsersServlet extends HttpServlet {
             return;
         }
 
-        resp.sendRedirect("users");
+        resp.sendRedirect(req.getContextPath() + "/users");
     }
 }

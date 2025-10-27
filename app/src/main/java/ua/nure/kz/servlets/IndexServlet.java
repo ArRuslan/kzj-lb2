@@ -11,6 +11,6 @@ import java.io.IOException;
 @WebServlet("/")
 public class IndexServlet extends HttpServlet {
     public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        resp.sendRedirect("login");
+        resp.sendRedirect(req.getContextPath() + "/login");
     }
 }
