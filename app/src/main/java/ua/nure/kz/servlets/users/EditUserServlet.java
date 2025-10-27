@@ -8,16 +8,35 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import ua.nure.kz.DatabaseManager;
+import ua.nure.kz.entities.Group;
 import ua.nure.kz.entities.User;
 import ua.nure.kz.servlets.Util;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 
 @WebServlet("/users/edit/*")
 public class EditUserServlet extends HttpServlet {
     private static final Log log = LogFactory.getLog(EditUserServlet.class);
+
+    public void doGetInternal(HttpServletRequest req, HttpServletResponse resp, User user) throws IOException, ServletException {
+        List<Group> userGroups;
+
+        try {
+            userGroups = DatabaseManager.getInstance().getUserGroups(new ArrayList<>() {{ add(user.getId()); }}).get(user.getId());
+        } catch (SQLException exc) {
+            log.error("Failed to get user's groups!", exc);
+            resp.sendRedirect(req.getContextPath() + "/users");
+            return;
+        }
+
+        req.setAttribute("user", user);
+        req.setAttribute("userGroups", userGroups);
+        req.getRequestDispatcher("/users/edit.jsp").forward(req, resp);
+    }
 
     public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
         if(Util.notLoggedInOrNotAdmin(req, resp, "/groups")) {
@@ -30,8 +49,7 @@ public class EditUserServlet extends HttpServlet {
             return;
         }
 
-        req.setAttribute("user", user);
-        req.getRequestDispatcher("/users/edit.jsp").forward(req, resp);
+        doGetInternal(req, resp, user);
     }
 
     public void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {

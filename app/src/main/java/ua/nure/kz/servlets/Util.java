@@ -115,4 +115,60 @@ public class Util {
             return null;
         }
     }
+
+    public static class Pair<T1, T2> {
+        public T1 first;
+        public T2 second;
+
+        public Pair(T1 first, T2 second) {
+            this.first = first;
+            this.second = second;
+        }
+    }
+
+    public static Pair<User, Group> getUserAndGroupFromParams(HttpServletRequest req) {
+        String userIdFromPath = req.getParameter("userId");
+        String groupIdFromPath = req.getParameter("groupId");
+        String groupNameFromPath = req.getParameter("groupName");
+
+        if(groupIdFromPath == null && groupNameFromPath == null) {
+            return null;
+        }
+
+        long userId;
+        long groupId;
+
+        try {
+            userId = Long.parseLong(userIdFromPath);
+            if(groupIdFromPath != null) {
+                groupId = Long.parseLong(groupIdFromPath);
+            } else {
+                groupId = 0;
+            }
+        } catch (NumberFormatException e) {
+            log.warn("Failed parse user or group id!", e);
+            return null;
+        }
+
+        User user;
+        Group group;
+
+        try {
+            user = DatabaseManager.getInstance().getUser(userId);
+            if(groupIdFromPath != null) {
+                group = DatabaseManager.getInstance().getGroup(groupId);
+            } else {
+                group = DatabaseManager.getInstance().getGroup(groupNameFromPath);
+            }
+        } catch (SQLException exc) {
+            log.error("Failed get user or group!", exc);
+            return null;
+        }
+
+        if(user == null || group == null) {
+            return null;
+        }
+
+        return new Pair<>(user, group);
+    }
 }

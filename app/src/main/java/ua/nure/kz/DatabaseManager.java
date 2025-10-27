@@ -212,6 +212,20 @@ public class DatabaseManager {
         }
     }
 
+    public Group getGroup(String name) throws SQLException {
+        try (Connection conn = getConnection()) {
+            PreparedStatement stmt = conn.prepareStatement(Queries.GET_GROUP_BY_NAME);
+            stmt.setString(1, name);
+
+            ResultSet result = stmt.executeQuery();
+            if(!result.next()) {
+                return null;
+            }
+
+            return Group.fromResultSet(result);
+        }
+    }
+
     public Group createGroup(Group group) throws SQLException {
         try (Connection conn = getConnection()) {
             PreparedStatement stmt = conn.prepareStatement(Queries.CREATE_GROUP, Statement.RETURN_GENERATED_KEYS);
@@ -279,6 +293,24 @@ public class DatabaseManager {
         return groups;
     }
 
+    public void removeUserFromGroup(User user, Group group) throws SQLException {
+        try (Connection conn = getConnection()) {
+            PreparedStatement stmt = conn.prepareStatement(Queries.REMOVE_USER_FROM_GROUP);
+            stmt.setLong(1, user.getId());
+            stmt.setLong(2, group.getId());
+            stmt.execute();
+        }
+    }
+
+    public void addUserToGroup(User user, Group group) throws SQLException {
+        try (Connection conn = getConnection()) {
+            PreparedStatement stmt = conn.prepareStatement(Queries.ADD_USER_TO_GROUP);
+            stmt.setLong(1, user.getId());
+            stmt.setLong(2, group.getId());
+            stmt.execute();
+        }
+    }
+
     private static class Queries {
         private static final String GET_USERS_PAGINATED = "SELECT * FROM `users` LIMIT ? OFFSET ?;";
         private static final String GET_USER_COUNT = "SELECT COUNT(*) FROM `users`;";
@@ -291,11 +323,15 @@ public class DatabaseManager {
         private static final String GET_GROUPS_PAGINATED = "SELECT * FROM `groups` LIMIT ? OFFSET ?;";
         private static final String GET_GROUP_COUNT = "SELECT COUNT(*) FROM `groups`;";
         private static final String GET_GROUP_BY_ID = "SELECT * FROM `groups` WHERE `id`=?;";
+        private static final String GET_GROUP_BY_NAME = "SELECT * FROM `groups` WHERE `name`=?;";
         private static final String CREATE_GROUP = "INSERT INTO `groups`(`name`) VALUES (?);";
         private static final String UPDATE_GROUP = "UPDATE `groups` SET `name`=? WHERE `id`=?;";
         private static final String DELETE_GROUP = "DELETE FROM `groups` WHERE `id`=?;";
 
         private static final String GET_GROUPS_BY_USERS = "SELECT g.id AS `group_id`, g.name AS `group_name`, ug.user_id AS `user_id` FROM `groups` g INNER JOIN `user_groups` JOIN `user_groups` ug on g.id = ug.group_id WHERE FIND_IN_SET(ug.user_id, ?);";
+
         private static final String GET_USERS_BY_GROUP_PAGINATED = "SELECT u.id AS `id`, u.login AS `login`, u.password AS `password`, u.fullName AS `fullName`, u.role AS `role` FROM `users` u INNER JOIN `user_groups` ug ON u.id = ug.user_id WHERE ug.group_id = ? LIMIT ? OFFSET ?;";
+        private static final String REMOVE_USER_FROM_GROUP = "DELETE FROM `user_groups` WHERE `user_id`=? AND `group_id` = ?;";
+        private static final String ADD_USER_TO_GROUP = "INSERT IGNORE INTO `user_groups` (`user_id`, `group_id`) VALUES (?, ?);";
     }
 }
