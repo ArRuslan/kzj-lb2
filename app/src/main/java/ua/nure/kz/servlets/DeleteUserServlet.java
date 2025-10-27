@@ -36,7 +36,7 @@ public class DeleteUserServlet extends HttpServlet {
         }
 
         req.setAttribute("user", user);
-        req.getRequestDispatcher("/user_delete.jsp").forward(req, resp);
+        req.getRequestDispatcher("/users/delete.jsp").forward(req, resp);
     }
 
     public void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
@@ -61,7 +61,7 @@ public class DeleteUserServlet extends HttpServlet {
         } catch (SQLException exc) {
             log.error("Failed to delete user!", exc);
             req.setAttribute("error", "Failed to delete edit user");
-            req.getRequestDispatcher("/user_delete.jsp").forward(req, resp);
+            req.getRequestDispatcher("/users/delete.jsp").forward(req, resp);
             return;
         }
 

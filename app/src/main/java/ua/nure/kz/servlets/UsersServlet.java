@@ -36,11 +36,11 @@ public class UsersServlet extends HttpServlet {
         } catch (SQLException exc) {
             log.error("Failed get users!", exc);
             req.setAttribute("error", "Failed to fetch users from database");
-            req.getRequestDispatcher("users.jsp").forward(req, resp);
+            req.getRequestDispatcher("/users/list/users/list.jsp").forward(req, resp);
             return;
         }
 
-        req.getRequestDispatcher("users.jsp").forward(req, resp);
+        req.getRequestDispatcher("/users/list.jsp").forward(req, resp);
     }
 
     public void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
@@ -63,7 +63,7 @@ public class UsersServlet extends HttpServlet {
 
         if(login == null || password == null || fullName == null || role == null) {
             req.setAttribute("error", "Invalid user data");
-            req.getRequestDispatcher("users.jsp").forward(req, resp);
+            req.getRequestDispatcher("/users/list.jsp").forward(req, resp);
             return;
         }
 
@@ -74,7 +74,7 @@ public class UsersServlet extends HttpServlet {
         } catch (SQLException exc) {
             log.error("Failed create user!", exc);
             req.setAttribute("error", "Failed to create user");
-            req.getRequestDispatcher("users.jsp").forward(req, resp);
+            req.getRequestDispatcher("/users/list.jsp").forward(req, resp);
             return;
         }
 

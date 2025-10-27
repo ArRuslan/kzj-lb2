@@ -36,7 +36,7 @@ public class EditUserServlet extends HttpServlet {
         }
 
         req.setAttribute("user", user);
-        req.getRequestDispatcher("/user_edit.jsp").forward(req, resp);
+        req.getRequestDispatcher("/users/edit.jsp").forward(req, resp);
     }
 
     public void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
@@ -63,7 +63,7 @@ public class EditUserServlet extends HttpServlet {
 
         if(login == null || password == null || fullName == null || role == null) {
             req.setAttribute("error", "Invalid user data");
-            req.getRequestDispatcher("/user_edit.jsp").forward(req, resp);
+            req.getRequestDispatcher("/users//edit.jsp").forward(req, resp);
             return;
         }
 
@@ -83,7 +83,7 @@ public class EditUserServlet extends HttpServlet {
         } catch (SQLException exc) {
             log.error("Failed to edit user!", exc);
             req.setAttribute("error", "Failed to edit user");
-            req.getRequestDispatcher("/user_edit.jsp").forward(req, resp);
+            req.getRequestDispatcher("/users/edit.jsp").forward(req, resp);
             return;
         }
 

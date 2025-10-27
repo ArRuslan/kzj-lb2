@@ -25,7 +25,7 @@ public class LoginServlet extends HttpServlet {
             return;
         }
 
-        req.getRequestDispatcher("login.jsp").forward(req, resp);
+        req.getRequestDispatcher("/login.jsp").forward(req, resp);
     }
 
     public void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
@@ -38,7 +38,7 @@ public class LoginServlet extends HttpServlet {
         } catch (SQLException exc) {
             log.error("Failed get user!", exc);
             req.setAttribute("error", "Failed to fetch user from database");
-            req.getRequestDispatcher("login.jsp").forward(req, resp);
+            req.getRequestDispatcher("/login.jsp").forward(req, resp);
             return;
         }
 
@@ -46,7 +46,7 @@ public class LoginServlet extends HttpServlet {
         if (user == null || !user.getPassword().equals(password)) {
             log.error("Unknown user or password is incorrect!");
             req.setAttribute("error", "User with this parameters does no exist");
-            req.getRequestDispatcher("login.jsp").forward(req, resp);
+            req.getRequestDispatcher("/login.jsp").forward(req, resp);
             return;
         }
 
