@@ -5,9 +5,7 @@ import ua.nure.kz.entities.User;
 
 import java.io.IOException;
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
 
 public class DatabaseManager {
     static {
@@ -239,6 +237,30 @@ public class DatabaseManager {
         }
     }
 
+    public Map<Long, List<Group>> getUserGroups(List<Long> userIds) throws SQLException {
+        Map<Long, List<Group>> groups = new HashMap<>();
+
+        try (Connection conn = getConnection()) {
+            PreparedStatement stmt = conn.prepareStatement(Queries.GET_GROUPS_BY_USERS);
+            stmt.setString(1, String.join(",", userIds.stream().map(String::valueOf).toList()));
+
+            ResultSet result = stmt.executeQuery();
+            while (result.next()) {
+                long userId = result.getLong("user_id");
+                long groupId = result.getLong("group_id");
+                String name = result.getString("group_name");
+
+                if(!groups.containsKey(userId)) {
+                    groups.put(userId, new ArrayList<>());
+                }
+
+                groups.get(userId).add(new Group(groupId, name));
+            }
+        }
+
+        return groups;
+    }
+
     private static class Queries {
         private static final String GET_USERS_PAGINATED = "SELECT * FROM `users` LIMIT ? OFFSET ?;";
         private static final String GET_USER_COUNT = "SELECT COUNT(*) FROM `users`;";
@@ -254,5 +276,7 @@ public class DatabaseManager {
         private static final String CREATE_GROUP = "INSERT INTO `groups`(`name`) VALUES (?);";
         private static final String UPDATE_GROUP = "UPDATE `groups` SET `name`=? WHERE `id`=?;";
         private static final String DELETE_GROUP = "DELETE FROM `groups` WHERE `id`=?;";
+
+        private static final String GET_GROUPS_BY_USERS = "SELECT g.id AS `group_id`, g.name AS `group_name`, ug.user_id AS `user_id` FROM `groups` g INNER JOIN `user_groups` JOIN `user_groups` ug on g.id = ug.group_id WHERE FIND_IN_SET(ug.user_id, ?);";
     }
 }
