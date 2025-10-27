@@ -1,25 +1,21 @@
 <%@ page contentType="text/html; charset=UTF-8"
          pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%@ taglib prefix="t" tagdir="/WEB-INF/tags" %>
 
-<html>
-<head>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
-</head>
-<body>
-You are logged in as user [${sessionScope.user.getRole().toString()}] <b>${sessionScope.user.getFullName()}</b> <a href="${pageContext.request.contextPath}/logout">Logout</a>
+<t:layout>
+    <jsp:attribute name="title">Edit user ${user.getLogin()}</jsp:attribute>
+    <jsp:body>
+        <form method="POST" action="${pageContext.request.contextPath}/users/edit/${user.getId()}" class="d-flex row gap-2">
+            <input name="login" placeholder="Login" value="${user.getLogin()}" class="form-control" />
+            <input name="password" placeholder="Password" type="password" value="${user.getPassword()}" class="form-control" />
+            <input name="fullName" placeholder="Full Name" value="${user.getFullName()}" class="form-control" />
+            <input name="role" placeholder="Role" value="${user.getRole()}" class="form-control" />
 
-<h2>User ${user.getLogin()}</h2>
-
-<form method="POST" action="${pageContext.request.contextPath}/users/edit/${user.getId()}" class="d-flex col gap-2">
-    <input name="login" placeholder="Login" value="${user.getLogin()}"/>
-    <input name="password" placeholder="Password" type="password" value="${user.getPassword()}"/>
-    <input name="fullName" placeholder="Full Name" value="${user.getFullName()}"/>
-    <input name="role" placeholder="Role" value="${user.getRole()}"/>
-
-    <button type="submit" class="btn btn-primary">Edit</button>
-</form>
-
-</body>
-</html>
+            <div class="btn-group d-flex" role="group">
+                <a role="button" href="${pageContext.request.contextPath}/users" class="btn btn-danger w-100">Cancel</a>
+                <button type="submit" class="btn btn-warning w-100">Edit</button>
+            </div>
+        </form>
+    </jsp:body>
+</t:layout>

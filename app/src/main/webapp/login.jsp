@@ -1,34 +1,21 @@
 <%@ page contentType="text/html; charset=UTF-8"
          pageEncoding="UTF-8" %>
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%@ taglib prefix="t" tagdir="/WEB-INF/tags" %>
 
-<html>
-<head>
-    <style>
-        .d-flex {
-            display: flex;
-        }
+<t:layout>
+    <jsp:attribute name="title">Login</jsp:attribute>
+    <jsp:body>
+        <div class="d-flex h-100 justify-content-center align-items-center">
+            <div class="w-50">
+                <h2 class="text-center">Login</h2>
+                <form method="POST" action="${pageContext.request.contextPath}/login" class="d-flex row gap-2">
+                    <input name="login" placeholder="Login" class="form-control" />
+                    <input name="password" placeholder="Password" type="password" class="form-control" />
 
-        .row {
-            flex-direction: row;
-        }
-
-        .col {
-            flex-direction: column;
-        }
-
-        .gap-2 {
-            gap: 1.5rem;
-        }
-    </style>
-</head>
-<body>
-<h2>Login</h2>
-<form method="POST" action="login" class="d-flex col gap-2">
-    <input name="login" placeholder="Login" />
-    <input name="password" placeholder="Password" type="password" />
-
-    <button type="submit">Login</button>
-</form>
-
-</body>
-</html>
+                    <button type="submit" class="btn btn-primary">Login</button>
+                </form>
+            </div>
+        </div>
+    </jsp:body>
+</t:layout>
