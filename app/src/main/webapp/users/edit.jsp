@@ -8,6 +8,10 @@
     <jsp:body>
         <h2>Edit user ${user.getLogin()}</h2>
 
+        <c:if test="${not empty error}">
+            <h3 style="color: red;">${error}</h3>
+        </c:if>
+
         <form method="POST" action="${pageContext.request.contextPath}/users/edit/${user.getId()}" class="d-flex row gap-2">
             <input name="login" placeholder="Login" value="${user.getLogin()}" class="form-control" />
             <input name="password" placeholder="Password" type="password" value="${user.getPassword()}" class="form-control" />

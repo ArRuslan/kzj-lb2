@@ -8,6 +8,10 @@
     <jsp:body>
         <h2>Are you sure you want to delete user ${user.getLogin()}?</h2>
 
+        <c:if test="${not empty error}">
+            <h3 style="color: red;">${error}</h3>
+        </c:if>
+
         <form action="" method="POST">
             <div class="btn-group d-flex" role="group">
                 <a role="button" href="${pageContext.request.contextPath}/users" class="btn btn-danger w-100">Cancel</a>

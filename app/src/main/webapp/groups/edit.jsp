@@ -6,6 +6,10 @@
 <t:layout>
     <jsp:attribute name="title">Edit user ${group.getName()}</jsp:attribute>
     <jsp:body>
+        <c:if test="${not empty error}">
+            <h3 style="color: red;">${error}</h3>
+        </c:if>
+
         <form method="POST" action="${pageContext.request.contextPath}/groups/edit/${group.getId()}" class="d-flex row gap-2">
             <input name="name" placeholder="Name" value="${group.getName()}" class="form-control" />
 

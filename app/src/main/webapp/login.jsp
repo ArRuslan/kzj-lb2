@@ -9,6 +9,9 @@
         <div class="d-flex h-100 justify-content-center align-items-center">
             <div class="w-50">
                 <h2 class="text-center">Login</h2>
+                <c:if test="${not empty error}">
+                    <h3 style="color: red;">${error}</h3>
+                </c:if>
                 <form method="POST" action="${pageContext.request.contextPath}/login" class="d-flex row gap-2">
                     <input name="login" placeholder="Login" class="form-control" />
                     <input name="password" placeholder="Password" type="password" class="form-control" />

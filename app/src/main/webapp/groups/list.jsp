@@ -7,6 +7,10 @@
 <t:layout>
     <jsp:attribute name="title">Groups</jsp:attribute>
     <jsp:body>
+        <c:if test="${not empty error}">
+            <h3 style="color: red;">${error}</h3>
+        </c:if>
+
         <c:if test="${sessionScope.user.getRole() == Role.ADMIN}">
             <h3>Add group</h3>
             <form method="POST" action="${pageContext.request.contextPath}/groups" class="d-flex col gap-2">
