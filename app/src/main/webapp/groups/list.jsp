@@ -48,5 +48,16 @@
             </c:forEach>
             </tbody>
         </table>
+
+        <t:pagination
+            hasPrev="${pagination.hasPrev}"
+            hasNext="${pagination.hasNext}"
+            pages="${pagination.pages}"
+            currentPath="${pagination.currentPath}"
+            currentQuery="${pagination.currentQuery}"
+            prevPage="${pagination.prevPage}"
+            nextPage="${pagination.nextPage}"
+            pageSize="${pagination.pageSize}"
+        />
     </jsp:body>
 </t:layout>

@@ -55,10 +55,9 @@ public class UsersServlet extends HttpServlet {
             return;
         }
 
-        req.setAttribute("pagination", Util.calculatePagination(req, pageInfo, entriesCount));
-
         req.setAttribute("users", users);
         req.setAttribute("userGroups", userGroups);
+        req.setAttribute("pagination", Util.calculatePagination(req, pageInfo, entriesCount));
         req.getRequestDispatcher("/users/list.jsp").forward(req, resp);
     }
 

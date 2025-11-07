@@ -14,6 +14,7 @@ import ua.nure.kz.servlets.Util;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.List;
 
 
 @WebServlet("/groups")
@@ -27,8 +28,13 @@ public class GroupsServlet extends HttpServlet {
             return;
         }
 
+        Util.PageInfo pageInfo = Util.parsePageInfo(req);
+        List<Group> groups;
+        long entriesCount;
+
         try {
-            req.setAttribute("groups", DatabaseManager.getInstance().getGroups(1, 5));
+            groups = DatabaseManager.getInstance().getGroups(pageInfo.page, pageInfo.pageSize);
+            entriesCount = DatabaseManager.getInstance().getGroupsCount();
         } catch (SQLException exc) {
             log.error("Failed get groups!", exc);
             req.setAttribute("error", "Failed to fetch groups from database");
@@ -36,6 +42,8 @@ public class GroupsServlet extends HttpServlet {
             return;
         }
 
+        req.setAttribute("groups", groups);
+        req.setAttribute("pagination", Util.calculatePagination(req, pageInfo, entriesCount));
         req.getRequestDispatcher("/groups/list.jsp").forward(req, resp);
     }
 
