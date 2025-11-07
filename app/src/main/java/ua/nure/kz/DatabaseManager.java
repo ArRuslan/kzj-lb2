@@ -89,7 +89,19 @@ public class DatabaseManager {
             ResultSet result = stmt.executeQuery(Queries.GET_USER_COUNT);
             result.next();
 
-            return result.getLong(0);
+            return result.getLong(1);
+        }
+    }
+
+    public long getUsersCount(Group group) throws SQLException {
+        try (Connection conn = getConnection()) {
+            PreparedStatement stmt = conn.prepareStatement(Queries.GET_USER_COUNT_BY_GROUP);
+            stmt.setLong(1, group.getId());
+
+            ResultSet result = stmt.executeQuery();
+            result.next();
+
+            return result.getLong(1);
         }
     }
 
@@ -194,7 +206,7 @@ public class DatabaseManager {
             ResultSet result = stmt.executeQuery(Queries.GET_GROUP_COUNT);
             result.next();
 
-            return result.getLong(0);
+            return result.getLong(1);
         }
     }
 
@@ -331,6 +343,7 @@ public class DatabaseManager {
         private static final String GET_GROUPS_BY_USERS = "SELECT g.id AS `group_id`, g.name AS `group_name`, ug.user_id AS `user_id` FROM `groups` g INNER JOIN `user_groups` ug on g.id = ug.group_id WHERE FIND_IN_SET(ug.user_id, ?);";
 
         private static final String GET_USERS_BY_GROUP_PAGINATED = "SELECT u.id AS `id`, u.login AS `login`, u.password AS `password`, u.fullName AS `fullName`, u.role AS `role` FROM `users` u INNER JOIN `user_groups` ug ON u.id = ug.user_id WHERE ug.group_id = ? LIMIT ? OFFSET ?;";
+        private static final String GET_USER_COUNT_BY_GROUP = "SELECT COUNT(*) FROM `users` u INNER JOIN `user_groups` ug ON u.id = ug.user_id WHERE ug.group_id = ?;";
         private static final String REMOVE_USER_FROM_GROUP = "DELETE FROM `user_groups` WHERE `user_id`=? AND `group_id` = ?;";
         private static final String ADD_USER_TO_GROUP = "INSERT IGNORE INTO `user_groups` (`user_id`, `group_id`) VALUES (?, ?);";
     }

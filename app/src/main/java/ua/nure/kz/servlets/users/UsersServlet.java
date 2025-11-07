@@ -11,7 +11,10 @@ import ua.nure.kz.DatabaseManager;
 import ua.nure.kz.entities.Group;
 import ua.nure.kz.entities.User;
 import ua.nure.kz.servlets.Util;
+import ua.nure.kz.utils.Pagination;
+import ua.nure.kz.utils.PaginationPage;
 
+import javax.xml.crypto.Data;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
@@ -30,15 +33,19 @@ public class UsersServlet extends HttpServlet {
         }
 
         Group byGroup = Util.getGroupFromParam(req, "groupId");
+        Util.PageInfo pageInfo = Util.parsePageInfo(req);
 
         List<User> users;
         Map<Long, List<Group>> userGroups;
+        long entriesCount;
 
         try {
             if(byGroup == null) {
-                users = DatabaseManager.getInstance().getUsers(1, 5);
+                users = DatabaseManager.getInstance().getUsers(pageInfo.page, pageInfo.pageSize);
+                entriesCount = DatabaseManager.getInstance().getUsersCount();
             } else {
-                users = DatabaseManager.getInstance().getUsers(byGroup, 1, 5);
+                users = DatabaseManager.getInstance().getUsers(byGroup, pageInfo.page, pageInfo.pageSize);
+                entriesCount = DatabaseManager.getInstance().getUsersCount(byGroup);
             }
             userGroups = DatabaseManager.getInstance().getUserGroups(users.stream().map(User::getId).toList());
         } catch (SQLException exc) {
@@ -47,6 +54,8 @@ public class UsersServlet extends HttpServlet {
             req.getRequestDispatcher("/users/list.jsp").forward(req, resp);
             return;
         }
+
+        req.setAttribute("pagination", Util.calculatePagination(req, pageInfo, entriesCount));
 
         req.setAttribute("users", users);
         req.setAttribute("userGroups", userGroups);

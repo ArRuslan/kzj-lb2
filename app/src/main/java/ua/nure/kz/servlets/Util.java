@@ -7,6 +7,8 @@ import org.apache.commons.logging.LogFactory;
 import ua.nure.kz.DatabaseManager;
 import ua.nure.kz.entities.Group;
 import ua.nure.kz.entities.User;
+import ua.nure.kz.utils.Pagination;
+import ua.nure.kz.utils.PaginationPage;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -170,5 +172,83 @@ public class Util {
         }
 
         return new Pair<>(user, group);
+    }
+
+    public static class PageInfo {
+        public int page;
+        public int pageSize;
+        public String query;
+
+        public PageInfo(int page, int pageSize, String query) {
+            this.page = page;
+            this.pageSize = pageSize;
+            this.query = query;
+        }
+    }
+
+    public static PageInfo parsePageInfo(HttpServletRequest req) {
+        String qs = req.getQueryString();
+        if(qs == null) {
+            return new PageInfo(1, 10, "");
+        }
+
+        StringBuilder queryStringBuilder = new StringBuilder(qs.length());
+
+        int page = 1;
+        int pageSize = 10;
+
+        for(String qsPart : qs.split("&")) {
+            if(qsPart.startsWith("page=")) {
+                String pageStr = qsPart.substring(5);
+                try {
+                    int pageMaybe = Integer.parseInt(pageStr);
+                    if(pageMaybe >= 1) {
+                        page = pageMaybe;
+                    }
+                } catch (NumberFormatException exc) {
+                    log.error("Failed parse page number!", exc);
+                }
+            } else if (qsPart.startsWith("pageSize=")) {
+                String pageSizeStr = qsPart.substring(9);
+                try {
+                    int pageSizeMaybe = Integer.parseInt(pageSizeStr);
+                    if(pageSizeMaybe >= 1) {
+                        pageSize = Math.min(pageSizeMaybe, 100);
+                    }
+                } catch (NumberFormatException exc) {
+                    log.error("Failed parse page number!", exc);
+                }
+            } else {
+                if(!queryStringBuilder.isEmpty()) {
+                    queryStringBuilder.append("&");
+                }
+                queryStringBuilder.append(qsPart);
+            }
+        }
+
+        return new PageInfo(page, pageSize, queryStringBuilder.toString());
+    }
+
+    public static Pagination calculatePagination(HttpServletRequest req, PageInfo pageInfo, long totalEntries) {
+        long totalPages = (totalEntries + pageInfo.pageSize - 1) / pageInfo.pageSize;
+
+        long minPage = Math.max(pageInfo.page - 2, 1);
+        long maxPage = Math.min(pageInfo.page + 2, totalPages);
+
+        PaginationPage[] pages = new PaginationPage[(int)(maxPage - minPage + 1)];
+        int i = 0;
+        for(long page = minPage; page <=maxPage; ++page, ++i) {
+            pages[i] = new PaginationPage(page == pageInfo.page, page);
+        }
+
+        return new Pagination(
+                pageInfo.page > 1,
+                pageInfo.page < totalPages,
+                pages,
+                req.getRequestURI(),
+                pageInfo.page > 1 ? pageInfo.page - 1 : pageInfo.page,
+                pageInfo.page < totalPages ? pageInfo.page + 1 : pageInfo.page,
+                pageInfo.pageSize,
+                pageInfo.query);
     }
 }
