@@ -151,7 +151,7 @@ public class DatabaseManager {
             }
 
             long id = result.getLong(1);
-            return new User(id, user.getLogin(), user.getPassword(), user.getFullName(), user.getRole());
+            return new User(id, user.getLogin(), user.getPassword(), true, user.getFullName(), user.getRole());
         }
     }
 

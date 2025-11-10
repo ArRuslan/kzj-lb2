@@ -43,8 +43,7 @@ public class LoginServlet extends HttpServlet {
             return;
         }
 
-        // TODO: password hashing (sha-256)
-        if (user == null || !user.getPassword().equals(password)) {
+        if (user == null || !user.checkPassword(password)) {
             log.error("Unknown user or password is incorrect!");
             req.setAttribute("error", "User with this parameters does no exist");
             req.getRequestDispatcher("/login.jsp").forward(req, resp);

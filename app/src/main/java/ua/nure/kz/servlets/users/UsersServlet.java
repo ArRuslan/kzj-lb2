@@ -11,11 +11,9 @@ import ua.nure.kz.DatabaseManager;
 import ua.nure.kz.entities.Group;
 import ua.nure.kz.entities.User;
 import ua.nure.kz.servlets.Util;
-import ua.nure.kz.utils.Pagination;
-import ua.nure.kz.utils.PaginationPage;
 
-import javax.xml.crypto.Data;
 import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
@@ -88,10 +86,19 @@ public class UsersServlet extends HttpServlet {
         User newUser = new User(login, password, fullName, User.Role.valueOf(role));
 
         try {
+            newUser.hashPasswordIfNotHashed();
+        } catch (NoSuchAlgorithmException exc) {
+            log.error("SHA3-256 is not supported ig", exc);
+            req.setAttribute("error", "Failed to create user: no sha256");
+            req.getRequestDispatcher("/users/list.jsp").forward(req, resp);
+            return;
+        }
+
+        try {
             DatabaseManager.getInstance().createUser(newUser);
         } catch (SQLException exc) {
             log.error("Failed create user!", exc);
-            req.setAttribute("error", "Failed to create user");
+            req.setAttribute("error", "Failed to create user: database error");
             req.getRequestDispatcher("/users/list.jsp").forward(req, resp);
             return;
         }

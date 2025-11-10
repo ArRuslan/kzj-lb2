@@ -13,6 +13,7 @@ import ua.nure.kz.entities.User;
 import ua.nure.kz.servlets.Util;
 
 import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -58,7 +59,7 @@ public class EditUserServlet extends HttpServlet {
         }
 
         String login = req.getParameter("login");
-        String password = req.getParameter("password");
+        String newPassword = req.getParameter("new_password");
         String fullName = req.getParameter("fullName");
         String role = req.getParameter("role");
 
@@ -68,7 +69,7 @@ public class EditUserServlet extends HttpServlet {
             role = null;
         }
 
-        if(login == null || password == null || fullName == null || role == null) {
+        if(login == null || fullName == null || role == null) {
             req.setAttribute("error", "Invalid user data");
             req.getRequestDispatcher("/users/edit.jsp").forward(req, resp);
             return;
@@ -81,9 +82,21 @@ public class EditUserServlet extends HttpServlet {
         }
 
         user.setLogin(login);
-        user.setPassword(password);
         user.setFullName(fullName);
         user.setRole(User.Role.valueOf(role));
+
+        if(newPassword != null && !newPassword.isEmpty()) {
+            user.setPassword(newPassword);
+            user.setPasswordHashed(false);
+            try {
+                user.hashPasswordIfNotHashed();
+            } catch (NoSuchAlgorithmException exc) {
+                log.error("SHA3-256 is not supported ig", exc);
+                req.setAttribute("error", "Failed to edit user: no sha256");
+                req.getRequestDispatcher("/users/edit.jsp").forward(req, resp);
+                return;
+            }
+        }
 
         try {
             DatabaseManager.getInstance().updateUser(user);

@@ -14,7 +14,7 @@
 
         <form method="POST" action="${pageContext.request.contextPath}/users/edit/${user.getId()}" class="d-flex row gap-2">
             <input name="login" placeholder="Login" value="${user.getLogin()}" class="form-control" />
-            <input name="password" placeholder="Password" type="password" value="${user.getPassword()}" class="form-control" />
+            <input name="new_password" placeholder="New Password" type="password" class="form-control" />
             <input name="fullName" placeholder="Full Name" value="${user.getFullName()}" class="form-control" />
             <input name="role" placeholder="Role" value="${user.getRole()}" class="form-control" />
 
