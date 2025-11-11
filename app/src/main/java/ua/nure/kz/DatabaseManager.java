@@ -17,6 +17,8 @@ public class DatabaseManager {
     }
 
     private static DatabaseManager instance;
+    private static final String USERS_GROUP_NAME = "users";
+    private static final String ADMINS_GROUP_NAME = "administrators";
 
     private final String connectionUrl;
     private final String user;
@@ -134,7 +136,11 @@ public class DatabaseManager {
     }
 
     public User createUser(User user) throws SQLException {
-        try (Connection conn = getConnection()) {
+        Connection conn = getConnection();
+
+        try {
+            conn.setAutoCommit(false);
+
             PreparedStatement stmt = conn.prepareStatement(Queries.CREATE_USER, Statement.RETURN_GENERATED_KEYS);
             stmt.setString(1, user.getLogin());
             stmt.setString(2, user.getPassword());
@@ -151,7 +157,36 @@ public class DatabaseManager {
             }
 
             long id = result.getLong(1);
-            return new User(id, user.getLogin(), user.getPassword(), true, user.getFullName(), user.getRole());
+            User newUser = new User(id, user.getLogin(), user.getPassword(), true, user.getFullName(), user.getRole());
+
+            String groupName;
+            switch (user.getRole()) {
+                case ADMIN: {
+                    groupName = ADMINS_GROUP_NAME;
+                    break;
+                }
+                case USER:
+                default: {
+                    groupName = USERS_GROUP_NAME;
+                    break;
+                }
+            }
+
+            Group usersGroup = getGroup(groupName);
+            if (usersGroup == null) {
+                usersGroup = createGroupWithConnection(new Group(groupName), conn);
+            }
+
+            addUserToGroupWithConnection(newUser, usersGroup, conn);
+
+            conn.commit();
+
+            return user;
+        } catch (SQLException exception) {
+            conn.rollback();
+            throw exception;
+        } finally {
+            conn.close();
         }
     }
 
@@ -238,22 +273,26 @@ public class DatabaseManager {
         }
     }
 
+    private Group createGroupWithConnection(Group group, Connection conn) throws SQLException {
+        PreparedStatement stmt = conn.prepareStatement(Queries.CREATE_GROUP, Statement.RETURN_GENERATED_KEYS);
+        stmt.setString(1, group.getName());
+
+        if (stmt.executeUpdate() == 0) {
+            throw new SQLException("Failed to create group (no rows affected)!");
+        }
+
+        ResultSet result = stmt.getGeneratedKeys();
+        if (!result.next()) {
+            throw new SQLException("Failed to create group (no id)!");
+        }
+
+        long id = result.getLong(1);
+        return new Group(id, group.getName());
+    }
+
     public Group createGroup(Group group) throws SQLException {
         try (Connection conn = getConnection()) {
-            PreparedStatement stmt = conn.prepareStatement(Queries.CREATE_GROUP, Statement.RETURN_GENERATED_KEYS);
-            stmt.setString(1, group.getName());
-
-            if (stmt.executeUpdate() == 0) {
-                throw new SQLException("Failed to create group (no rows affected)!");
-            }
-
-            ResultSet result = stmt.getGeneratedKeys();
-            if(!result.next()) {
-                throw new SQLException("Failed to create group (no id)!");
-            }
-
-            long id = result.getLong(1);
-            return new Group(id, group.getName());
+            return createGroupWithConnection(group, conn);
         }
     }
 
@@ -314,17 +353,21 @@ public class DatabaseManager {
         }
     }
 
+    private void addUserToGroupWithConnection(User user, Group group, Connection conn) throws SQLException {
+        PreparedStatement stmt = conn.prepareStatement(Queries.ADD_USER_TO_GROUP);
+        stmt.setLong(1, user.getId());
+        stmt.setLong(2, group.getId());
+        stmt.execute();
+    }
+
     public void addUserToGroup(User user, Group group) throws SQLException {
         try (Connection conn = getConnection()) {
-            PreparedStatement stmt = conn.prepareStatement(Queries.ADD_USER_TO_GROUP);
-            stmt.setLong(1, user.getId());
-            stmt.setLong(2, group.getId());
-            stmt.execute();
+            addUserToGroupWithConnection(user, group, conn);
         }
     }
 
     private static class Queries {
-        private static final String GET_USERS_PAGINATED = "SELECT * FROM `users` LIMIT ? OFFSET ?;";
+        private static final String GET_USERS_PAGINATED = "SELECT * FROM `users` ORDER BY id LIMIT ? OFFSET ?;";
         private static final String GET_USER_COUNT = "SELECT COUNT(*) FROM `users`;";
         private static final String GET_USER_BY_ID = "SELECT * FROM `users` WHERE `id`=?;";
         private static final String GET_USER_BY_LOGIN = "SELECT * FROM `users` WHERE `login`=?;";
@@ -332,7 +375,7 @@ public class DatabaseManager {
         private static final String UPDATE_USER = "UPDATE `users` SET `login`=?, `password`=?, `fullName`=?, `role`=? WHERE `id`=?;";
         private static final String DELETE_USER = "DELETE FROM `users` WHERE `id`=?;";
 
-        private static final String GET_GROUPS_PAGINATED = "SELECT * FROM `groups` LIMIT ? OFFSET ?;";
+        private static final String GET_GROUPS_PAGINATED = "SELECT * FROM `groups` ORDER BY id LIMIT ? OFFSET ?;";
         private static final String GET_GROUP_COUNT = "SELECT COUNT(*) FROM `groups`;";
         private static final String GET_GROUP_BY_ID = "SELECT * FROM `groups` WHERE `id`=?;";
         private static final String GET_GROUP_BY_NAME = "SELECT * FROM `groups` WHERE `name`=?;";
@@ -340,9 +383,9 @@ public class DatabaseManager {
         private static final String UPDATE_GROUP = "UPDATE `groups` SET `name`=? WHERE `id`=?;";
         private static final String DELETE_GROUP = "DELETE FROM `groups` WHERE `id`=?;";
 
-        private static final String GET_GROUPS_BY_USERS = "SELECT g.id AS `group_id`, g.name AS `group_name`, ug.user_id AS `user_id` FROM `groups` g INNER JOIN `user_groups` ug on g.id = ug.group_id WHERE FIND_IN_SET(ug.user_id, ?);";
+        private static final String GET_GROUPS_BY_USERS = "SELECT g.id AS `group_id`, g.name AS `group_name`, ug.user_id AS `user_id` FROM `groups` g INNER JOIN `user_groups` ug ON g.id = ug.group_id WHERE FIND_IN_SET(ug.user_id, ?) ORDER BY g.id;";
 
-        private static final String GET_USERS_BY_GROUP_PAGINATED = "SELECT u.id AS `id`, u.login AS `login`, u.password AS `password`, u.fullName AS `fullName`, u.role AS `role` FROM `users` u INNER JOIN `user_groups` ug ON u.id = ug.user_id WHERE ug.group_id = ? LIMIT ? OFFSET ?;";
+        private static final String GET_USERS_BY_GROUP_PAGINATED = "SELECT u.id AS `id`, u.login AS `login`, u.password AS `password`, u.fullName AS `fullName`, u.role AS `role` FROM `users` u INNER JOIN `user_groups` ug ON u.id = ug.user_id WHERE ug.group_id = ? ORDER BY u.id LIMIT ? OFFSET ?;";
         private static final String GET_USER_COUNT_BY_GROUP = "SELECT COUNT(*) FROM `users` u INNER JOIN `user_groups` ug ON u.id = ug.user_id WHERE ug.group_id = ?;";
         private static final String REMOVE_USER_FROM_GROUP = "DELETE FROM `user_groups` WHERE `user_id`=? AND `group_id` = ?;";
         private static final String ADD_USER_TO_GROUP = "INSERT IGNORE INTO `user_groups` (`user_id`, `group_id`) VALUES (?, ?);";
